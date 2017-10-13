@@ -1,16 +1,21 @@
 package cz.fi.muni.pa165;
 
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 
+import cz.fi.muni.pa165.entity.Product;
+import cz.fi.muni.pa165.enums.Color;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import cz.fi.muni.pa165.entity.Category;
-import cz.fi.muni.pa165.entity.Product;
 
 public class MainJavaSe {
 	private static EntityManagerFactory emf;
@@ -22,7 +27,7 @@ public class MainJavaSe {
 		emf = Persistence.createEntityManagerFactory("default");
 		try {
 			// BEGIN YOUR CODE
-			task04();
+			task06();
 			// END YOUR CODE
 		} finally {
 			emf.close();
@@ -37,6 +42,17 @@ public class MainJavaSe {
 		// Then you have to start transaction using getTransaction().begin()
 		// Then use persist() to persist both of the categories and finally commit the transaction
 
+		Category el = new Category();
+		Category mu = new Category();
+		el.setName("Electronics");
+		mu.setName("Musical");
+
+		EntityManager enma = emf.createEntityManager();
+		enma.getTransaction().begin();
+		enma.persist(el);
+		enma.persist(mu);
+		enma.getTransaction().commit();
+
 		// The code below is just testing code. Do not modify it
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
@@ -44,8 +60,8 @@ public class MainJavaSe {
 				"select c from Category c order by c.name", Category.class)
 				.getResultList();
 
-                if (categories.size() != 2) 
-                    throw new RuntimeException("Expected two categories!");
+		if (categories.size() != 2)
+			throw new RuntimeException("Expected two categories!");
 
 		assertEq(categories.get(0).getName(), "Electronics");
 		assertEq(categories.get(1).getName(), "Musical");
@@ -69,6 +85,12 @@ public class MainJavaSe {
 		// the detached category
 		// into the context and change the name to "Electro"
 
+		EntityManager mem = emf.createEntityManager();
+		mem.getTransaction().begin();
+		category.setName("Electro");
+		mem.merge(category);
+		mem.getTransaction().commit();
+
 
 		// The code below is just testing code. Do not modify it
 		EntityManager checkingEm = emf.createEntityManager();
@@ -89,12 +111,21 @@ public class MainJavaSe {
 		// Then persist exactly one Product with the following values:
 		// * name='Guitar'
 		// * color=Color.BLACK
-		// * dateAdded = 20-01-2011 - to fill java.util.Date use Calendar 
+		// * dateAdded = 20-01-2011 - to fill java.util.Date use LocalDate.of(2011, 1, 20) and pass it into Date.valueOf(LocalDate)
 		//
 		// Additional task: Change the underlying table of Product entity to be ESHOP_PRODUCTS. After you do this, check this by inspecting console output (the CREATE TABLE statement)
 		//
 		// To test your code uncomment the commented code at the end of this method.
 
+		Product product = new Product();
+		product.setName("Guitar");
+		product.setColor(Color.BLACK);
+		product.setAddedDate(Date.valueOf(LocalDate.of(2011,1,20)));
+
+		EntityManager mem = emf.createEntityManager();
+		mem.getTransaction().begin();
+		mem.persist(product);
+		mem.getTransaction().commit();
 
 		EntityManager em = emf.createEntityManager();
 		em.getTransaction().begin();
@@ -103,8 +134,8 @@ public class MainJavaSe {
 		em.getTransaction().commit();
 		em.close();
 
-	/** TODO Uncomment the following test code after you are finished!
-	 
+		//TODO Uncomment the following test code after you are finished!
+
 		assertEq(p.getName(), "Guitar");
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(p.getAddedDate());
@@ -126,7 +157,7 @@ public class MainJavaSe {
 		System.out.println("Successfully persited Violin");
 		try {
 			em.persist(p2);
-			
+
 			throw new RuntimeException(
 					"Successfully saved new Product with the same name (Guitar) it should be unique!");
 		} catch (PersistenceException ex) {
@@ -134,18 +165,17 @@ public class MainJavaSe {
 					.println("Unsuccessfully saved second object with name Guitar -> OK");
 		}
 		em.close();
-	
+
 
 		System.out.println("Task6 ok!");
-		*/
 	}
-	
+
 	private static void task08() {
 		System.out.println("Running TASK 08");
-		//Implement business equivalence on Product (equals and hashcode method). Tip: Product.name is nonullable and should have unique values 
+		//Implement business equivalence on Product (equals and hashcode method). Tip: Product.name is nonullable and should have unique values
 		//This is very important concept and you should understand it beyond just "making this method work"
 		// see https://developer.jboss.org/wiki/EqualsandHashCode
-		
+
 		//TODO after you implement equals nad hashCode, you can uncomment the code below. It will try
 		// to check whether you are doing everything correctly. 
 	
@@ -188,7 +218,7 @@ public class MainJavaSe {
 			System.out.println("CORRECT");
 		} else System.out.println("INCORRECT!");
 		 */
-	
+
 	}
 
 	private static void assertEq(Object obj1, Object obj2) {
