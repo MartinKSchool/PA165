@@ -1,10 +1,12 @@
 package cz.fi.muni.pa165.tasks;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
+import javax.rmi.PortableRemoteObject;
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.test.context.ContextConfiguration;
@@ -70,7 +72,61 @@ public class Task02 extends AbstractTestNGSpringContextTests {
 		this.plate = plate;
 	}
 
+	@Test
+	public void electroTest(){
+		EntityManager em = this.emf.createEntityManager();
 
+		em.getTransaction().begin();
+		Category found = em.find(Category.class, this.electro.getId());
+		em.close();
+
+		assertContainsProductWithName(found.getProducts(), this.flashlight.getName());
+	}
+
+	@Test
+	public void flashlightTest() {
+		EntityManager em = this.emf.createEntityManager();
+
+		em.getTransaction().begin();
+		Product found = em.find(Product.class, this.flashlight.getId());
+		em.close();
+
+		assertContainsCategoryWithName(found.getCategories(), this.electro.getName());
+	}
+
+	@Test
+	public void kitchenTest(){
+		EntityManager em = this.emf.createEntityManager();
+
+		em.getTransaction().begin();
+		Category found = em.find(Category.class, this.kitchen.getId());
+		em.close();
+
+		assertContainsProductWithName(found.getProducts(), this.kitchenRobot.getName());
+		assertContainsProductWithName(found.getProducts(), this.plate.getName());
+	}
+
+	@Test
+	public void kitchenRobotTest(){
+		EntityManager em = this.emf.createEntityManager();
+
+		em.getTransaction().begin();
+		Product found = em.find(Product.class, this.kitchenRobot.getId());
+		em.close();
+
+		assertContainsCategoryWithName(found.getCategories(), this.kitchen.getName());
+	}
+
+	@Test
+	public void plateTest(){
+		EntityManager em = this.emf.createEntityManager();
+
+		em.getTransaction().begin();
+		Product found = em.find(Product.class, this.plate.getId());
+		em.close();
+
+		assertContainsCategoryWithName(found.getCategories(), this.kitchen.getName());
+	}
 
 	private void assertContainsCategoryWithName(Set<Category> categories,
 												String expectedCategoryName) {
